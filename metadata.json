@@ -1,0 +1,8 @@
+{
+  "name": "SIRA.APP",
+  "description": "Sistema de reporte ciudadano para emergencias y percances municipales con soporte offline e IA asistida.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}

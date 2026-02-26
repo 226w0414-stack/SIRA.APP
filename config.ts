@@ -1,0 +1,1 @@
+export const API_BASE_URL = "http://20.20.3.182"; // Aquí va la IP que VSC marque

@@ -39,6 +39,25 @@ const ChatBot: React.FC = () => {
     handleSend(text);
   };
 
+  // Dentro de tu componente ChatBot
+  const handleLocationRequest = () => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          // Aquí mandas las coordenadas al chat como si fuera un mensaje del usuario
+          sendBotMessage(`He recibido tu ubicación: ${latitude}, ${longitude}. ¿En qué más puedo ayudarte?`);
+        
+          // Opcional: Guardar en el estado global para el reporte final
+          updateLocationInReport(latitude, longitude);
+        },
+        (error) => {
+          sendBotMessage("No pude acceder a tu ubicación. Por favor, asegúrate de darme permiso en el navegador.");
+        }
+      );
+    }
+  };
+
   return (
     <>
       {/* Botón Flotante con branding de Veracruz */}

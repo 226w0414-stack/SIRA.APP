@@ -288,7 +288,12 @@ const ClientView: React.FC<Props> = ({ onReportSubmit }) => {
         </p>
       </div>
 
-      <ChatBot />
+      // En tu ClientView.tsx
+      <ChatBot 
+          onLocationDetected={(lat, lng) => {
+          setLocation({ latitude: lat, longitude: lng, isManual: false });
+          }} 
+      />
     </div>
   );
 };

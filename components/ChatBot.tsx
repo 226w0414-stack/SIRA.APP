@@ -3,7 +3,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { getAiResponse } from '../services/geminiService';
 import { ChatMessage } from '../types';
 
-const ChatBot: React.FC = () => {
+interface Props {
+  onLocationFound?: (lat: number, lng: number) => void;
+}
+
+const ChatBot: React.FC<Props> = ({ onLocationFound }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: 'model', text: '¿En qué puedo ayudar? ¿Se cayó otro árbol?' }
@@ -39,22 +43,33 @@ const ChatBot: React.FC = () => {
     handleSend(text);
   };
 
+  const addBotMessage = (text: string) => {
+    setMessages(prev => [...prev, { role: 'model', text }]);
+  };
+
   // Dentro de tu componente ChatBot
   const handleLocationRequest = () => {
+    addBotMessage("Solicitando acceso a tu GPS... por favor confirma el permiso en tu navegador.");
+
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
           // Aquí mandas las coordenadas al chat como si fuera un mensaje del usuario
-          sendBotMessage(`He recibido tu ubicación: ${latitude}, ${longitude}. ¿En qué más puedo ayudarte?`);
+          addBotMessage(`He recibido tu ubicación: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}. Ya la he registrado en tu reporte.`);
         
-          // Opcional: Guardar en el estado global para el reporte final
-          updateLocationInReport(latitude, longitude);
+          if (onLocationFound) {
+            onLocationFound(latitude, longitude);
+          }
         },
         (error) => {
-          sendBotMessage("No pude acceder a tu ubicación. Por favor, asegúrate de darme permiso en el navegador.");
-        }
+          console.error(error);
+          addBotMessage("No pude acceder a tu ubicación. Por favor, asegúrate de darme permiso en el navegador.");
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
       );
+    } else{
+      addBotMessage("Tu dispositivo no soporta geolocalización.");
     }
   };
 
@@ -121,6 +136,13 @@ const ChatBot: React.FC = () => {
 
           {/* Sugerencias Rápidas */}
           <div className="px-4 py-3 border-t border-slate-100 flex gap-2 overflow-x-auto bg-white scrollbar-hide">
+            <button
+              onClick={handleLocationRequest}
+              className="whitespace-nowrap px-4 py-2 rounded-full bg-blue-50 text-[#003366] text-xs font-black border border-blue-200 hover:bg-blue-100 transition-colors flex items-center gap-2"
+            >
+            📍 Compartir mi ubicación
+            </button>
+
             {['¿Se cayó un árbol?', 'Tengo una inundación', 'Cables sueltos', '¿Qué hago si hay Norte?'].map((txt) => (
               <button
                 key={txt}

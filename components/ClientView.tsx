@@ -45,7 +45,7 @@ const ClientView: React.FC<Props> = ({ onReportSubmit }) => {
         canvas.height = img.height * scaleSize;
         ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
         const compressedBase64 = canvas.toDataURL('image/jpeg', 0.5);
-        setImage(compressedBase64); // Guardamos la versión ligera
+        setImage(compressedBase64);
       };
     };
     reader.readAsDataURL(file);
@@ -288,7 +288,6 @@ const ClientView: React.FC<Props> = ({ onReportSubmit }) => {
         </p>
       </div>
 
-      // En tu ClientView.tsx
       <ChatBot 
           onLocationDetected={(lat, lng) => {
           setLocation({ latitude: lat, longitude: lng, isManual: false });

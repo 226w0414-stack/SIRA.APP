@@ -93,8 +93,7 @@ const App: React.FC = () => {
       try {
         const response = await fetch(`${API_BASE_URL}/get_reports.php` {
         method: 'GET',
-        mode: 'cors',
-        credentials: 'omit'
+        mode: 'cors'
         });
         if (response.ok) {
           const data = await response.json();

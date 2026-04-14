@@ -91,7 +91,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const fetchReportsFromServer = async() => {
       try {
-        const response = await fetch(`${API_BASE_URL}get_reports.php` {
+        const response = await fetch(`${API_BASE_URL}/get_reports.php` {
         method: 'GET',
         mode: 'cors',
         credentials: 'omit'
@@ -112,7 +112,7 @@ const App: React.FC = () => {
   const handleAddReport = async (newReport: IncidentReport) => {
     console.log("Enviando reporte:", newReport);
     try {
-      const response = await fetch(`${API_BASE_URL}save_report.php`, {
+      const response = await fetch(`${API_BASE_URL}/save_report.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newReport)

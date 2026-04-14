@@ -91,9 +91,10 @@ const App: React.FC = () => {
   useEffect(() => {
     const fetchReportsFromServer = async() => {
       try {
-        const response = await fetch(`${API_BASE_URL}/get_reports.php` {
+        const response = await fetch(`${API_BASE_URL}/get_reports.php`, {
         method: 'GET',
-        mode: 'cors'
+        mode: 'cors',
+        credentials: 'omit'
         });
         if (response.ok) {
           const data = await response.json();

@@ -91,7 +91,11 @@ const App: React.FC = () => {
   useEffect(() => {
     const fetchReportsFromServer = async() => {
       try {
-        const response = await fetch(`${API_BASE_URL}/sira_db/get_reports.php`);
+        const response = await fetch(`${API_BASE_URL}/sira_db/get_reports.php` {
+        method: 'GET',
+        mode: 'cors',
+        credentials: 'omit'
+        });
         if (response.ok) {
           const data = await response.json();
           setReports(data);

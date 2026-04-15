@@ -135,13 +135,38 @@ const App: React.FC = () => {
     }
   };
 
-  const handleFinalizeReport = (id: string) => {
-    const confirmed = window.confirm("¿Estás seguro de que deseas finalizar este reporte? Esta acción no se puede deshacer.");
+  const handleFinalizeReport = async (id: string) => {
+    const confirmed = window.confirm("¿Estás seguro de que deseas finalizar este reporte? Esta acción se borrará permanentemente de la base de datos.");
+    
     if (confirmed) {
-      const updated = reports.filter(report => report.id !== id);
-      setReports(updated);
-      localStorage.setItem('pc_veracruz_reports', JSON.stringify(updated));
-      alert("El reporte ha sido finalizado y retirado del monitor.");
+      try {
+        // 1. Avisar al Backend (Render) que borre el registro en PostgreSQL
+        const response = await fetch(`${API_BASE_URL}/delete_report.php`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ id: id }),
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          // 2. Si el backend lo borró con éxito, actualizamos la pantalla
+          const updated = reports.filter(report => report.id !== id);
+          setReports(updated);
+          
+          // 3. Limpiamos también el localStorage para que todo coincida
+          localStorage.setItem('pc_veracruz_reports', JSON.stringify(updated));
+          
+          alert("El reporte ha sido eliminado permanentemente de la base de datos.");
+        } else {
+          alert("Error al intentar borrar en el servidor: " + (result.error || "Desconocido"));
+        }
+      } catch (error) {
+        console.error("Error de conexión al eliminar:", error);
+        alert("No se pudo conectar con el servidor para eliminar el reporte.");
+      }
     }
   };
 

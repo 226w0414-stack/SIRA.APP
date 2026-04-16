@@ -5,9 +5,10 @@ import { IncidentReport } from '../types';
 interface Props {
   reports: IncidentReport[];
   onFinalize: (id: string) => void;
+  onDispatch: (id: string) => void;
 }
 
-const AdminView: React.FC<Props> = ({ reports, onFinalize}) => {
+const AdminView: React.FC<Props> = ({ reports, onFinalize, onDispatch }) => {
   return (
     <div className="p-4 space-y-4">
       <div className="bg-[#003366] text-white p-4 rounded-xl shadow-md">
@@ -30,18 +31,37 @@ const AdminView: React.FC<Props> = ({ reports, onFinalize}) => {
           </div>
         ) : (
           reports.map((report) => (
-            <div key={report.id} className="bg-white rounded-xl shadow border border-slate-200 overflow-hidden flex flex-col md:flex-row">
+            <div 
+              key={report.id} 
+              // Estado = 'en camino' -> resalta el reporte en naranja para indicar que ya se está atendiendo
+              className={`bg-white rounded-xl shadow border-2 overflow-hidden flex flex-col md:flex-row transition-all ${
+                report.estado === 'en_camino' 
+                ? 'border-orange-400 bg-orange-50/50' 
+                : 'border-slate-200'
+              }`}
+            >
               <div className="md:w-1/3 aspect-video md:aspect-auto">
                 <img src={report.image} alt="Incidente" className="w-full h-full object-cover" />
               </div>
               <div className="p-4 flex-1">
                 <div className="flex justify-between items-start mb-2">
+                  <div className="flex gap-2">
+                    {/* Etiqueta de sincronizacion*/}
                   <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${report.status === 'sent' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                    {report.status === 'sent' ? 'Recibido' : 'Pendiente Sincronización'}
+                    {report.status === 'sent' ? 'Recibido' : 'Pendiente'}
                   </span>
+                  {/* Nueva Etiqueta: Estado de atención */}
+                  {report.estado === 'en_camino' && (
+                    <span className="px-2 py-1 rounded text-[10px] font-bold uppercase bg-orange-500 text-white animate-pulse">
+                      ⚠️ Unidad en Camino
+                      </span>
+                      )}
+                  </div>
                   <span className="text-xs text-slate-400">{new Date(report.timestamp).toLocaleString()}</span>
                 </div>
+
                 <h3 className="font-bold text-[#003366] text-lg mb-1">{report.description}</h3>
+
                 <div className="mt-2 p-2 bg-blue-50 rounded-lg border border-blue-100">
                   <p className="text-[10px] font-black text-blue-800 uppercase">Informante:</p>
                   <p className="text-sm font-bold text-slate-700">{report.informantName}</p>
@@ -58,10 +78,19 @@ const AdminView: React.FC<Props> = ({ reports, onFinalize}) => {
                   </span>
                 </div>
                 <div className="mt-4 flex gap-2">
+                  {/* Botón Despachar: Se deshabilita o cambia si ya está en camino */}
                   <button
-                   className="flex-1 bg-[#FF8C00] text-white text-xs font-bold py-2 rounded hover:bg-[#e67e00]"
-                   >Despachar Unidad
+                   onClick={() => onDispatch(report.id)}
+                   disabled={report.estado === 'en_camino'}
+                   className={`flex-1 text-xs font-bold py-2 rounded transition-all ${
+                      report.estado === 'en_camino'
+                      ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
+                      : 'bg-[#FF8C00] text-white hover:bg-[#e67e00]'
+                    }`}
+                   >
+                    {report.estado === 'en_camino' ? 'Unidad Asignada' : 'Despachar Unidad'}
                   </button>
+
                   <button
                     onClick={() => onFinalize(report.id)}
                     className="flex-1 bg-red-50 text-red-600 border border-red-200 text-xs font-bold py-2 rounded hover:bg-red-600 hover:text-white transition-all"

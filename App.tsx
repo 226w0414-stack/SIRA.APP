@@ -170,6 +170,24 @@ const App: React.FC = () => {
     }
   };
 
+  const handleDispatchUnit = async (id: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/dispatch_unit.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+
+      if (response.ok) {
+        // Actualizamos el estado localmente para que cambie el color en pantalla
+        setReports(prev => prev.map(r => r.id === id ? { ...r, estado: 'en_camino' } : r));
+        alert("Unidad marcada como 'En Camino'.");
+      }
+    } catch (error) {
+      console.error("Error al despachar:", error);
+    }
+  };
+
   return (
     <HashRouter>
       <div className="min-h-screen flex flex-col pb-16 bg-slate-50 selection:bg-orange-200">
@@ -183,7 +201,7 @@ const App: React.FC = () => {
             {/* Ruta de Protección Civil (Oculta del menú del cliente) */}
             <Route
             path="/admin"
-            element={<AdminView reports={reports} onFinalize={handleFinalizeReport} />} />
+            element={<AdminView reports={reports} onFinalize={handleFinalizeReport} onDispatch={handleDispatchUnit} />} />
           </Routes>
         </main>
         <Navigation />

@@ -80,6 +80,20 @@ const Header = () => {
         ) : (
           <div className="bg-orange-500 text-white text-[10px] font-black px-2 py-1 rounded">PC-ADMIN</div>
         )}
+
+        {/* Botón Flotante para el Panel de Admin */}
+<button 
+  onClick={() => {/* Aquí pondrás la lógica para cambiar de vista o ir a la ruta /admin */}}
+  className="fixed bottom-24 left-6 bg-[#003366] text-white p-4 rounded-full shadow-2xl hover:bg-[#002244] hover:scale-110 transition-all z-50 group flex items-center gap-2"
+  title="Panel de Administrador"
+>
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+  <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 ease-in-out whitespace-nowrap text-sm font-bold">
+    Admin
+  </span>
+</button>
       </div>
     </header>
   );

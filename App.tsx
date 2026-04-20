@@ -54,7 +54,7 @@ const Navigation = () => {
           to="/admin" 
           onClick={(e) => {
             const pass = prompt("Clave:");
-            if(pass !== "1234") e.preventDefault(); // Cancela el viaje si la clave es mal
+            if(pass !== "2125") e.preventDefault(); // Cancela el viaje si la clave es mal
           }}
           className="flex flex-col items-center flex-1 py-2 text-slate-400 opacity-20 hover:opacity-100"
         >

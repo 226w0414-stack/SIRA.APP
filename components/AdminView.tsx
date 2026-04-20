@@ -77,19 +77,6 @@ const AdminView: React.FC<Props> = ({ reports, onFinalize, onDispatch }) => {
                     {report.location.manualAddress && ` - ${report.location.manualAddress}`}
                   </span>
                 </div>
-                <div className="mt-4 rounded-xl border border-slate-200 overflow-hidden shadow-inner bg-slate-100">
-                  <p className="text-[10px] font-bold text-slate-500 p-2 bg-slate-50 border-b italic">
-                  📍 UBICACIÓN EN TIEMPO REAL
-                  </p>
-                  <iframe
-                    width="100%"
-                    height="150"
-                    style={{ border: 0 }}
-                    loading="lazy"
-                    allowFullScreen
-                    src={`https://www.google.com/search?q=https://maps.google.com/maps%3Fq%3D${report.location.latitude},${report.location.longitude}&z=15&output=embed`}
-                  ></iframe>
-                </div>
                 <div className="mt-4 flex gap-2">
                   {/* Botón Despachar: Se deshabilita o cambia si ya está en camino */}
                   <button
@@ -109,6 +96,19 @@ const AdminView: React.FC<Props> = ({ reports, onFinalize, onDispatch }) => {
                     className="flex-1 bg-red-50 text-red-600 border border-red-200 text-xs font-bold py-2 rounded hover:bg-red-600 hover:text-white transition-all"
                     >Finalizar Reporte
                   </button>
+                </div>
+                <div className="mt-3 w-full h-32 rounded-lg overflow-hidden border border-slate-200">
+                  <p className="text-[10px] font-bold text-slate-500 p-2 bg-slate-50 border-b italic">
+                    📍 UBICACIÓN EN TIEMPO REAL
+                  </p>
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    frameBorder="0"
+                    src={`https://maps.google.com/maps?q=${report.location.latitude},${report.location.longitude}&z=15&output=embed`}
+                    allowFullScreen
+                  >
+                  </iframe>
                 </div>
               </div>
             </div>

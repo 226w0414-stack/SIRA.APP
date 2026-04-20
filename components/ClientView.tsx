@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { IncidentReport, LocationData } from '../types';
 import ChatBot from './ChatBot';
+import { Geolocation } from '@capacitor/geolocation'; // <--- Importante
 
 interface Props {
   onReportSubmit: (report: IncidentReport) => void;
@@ -52,37 +53,36 @@ const ClientView: React.FC<Props> = ({ onReportSubmit }) => {
     }
   };
 
-  const requestLocation = () => {
+  const requestLocation = async () => {
     setIsLocating(true);
-    const options = {
-    enableHighAccuracy: true,
-    timeout: 10000,
-    maximumAge: 0
-    };
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-            isManual: false
-          });
+    try {
+      const permissions = await Geolocation.checkPermissions();
+      if (permissions.location !== 'granted') {
+        const request = await Geolocation.requestPermissions();
+        if (request.location !== 'granted') {
+          alert("Se requieren permisos de ubicación.");
           setIsLocating(false);
-        },
-        (error) => {
-          console.error("Error getting location", error);
-          setIsLocating(false);
-          if (error.code === 1) alert("Permiso denegado. Revisa si Chrome tiene permiso de ubicación.");
-          else if (error.code === 3) alert("Se agotó el tiempo de espera para obtener GPS.");
-          else alert("Error de ubicación: " + error.message);
-        },
-        options
-      );
-    } else {
+          return;
+        }
+      }
+
+      const position = await Geolocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 10000
+      });
+
+      setLocation({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        isManual: false
+      });
+    } catch (error) {
+      console.error("Error", error);
+      alert("Error al obtener ubicación nativa.");
+    } finally {
       setIsLocating(false);
-      alert("Geolocalización no soportada en este dispositivo.");
     }
-  };
+  }; // <--- REVISA QUE ESTA LLAVE ESTÉ AQUÍ
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,7 +106,7 @@ const ClientView: React.FC<Props> = ({ onReportSubmit }) => {
       id: Date.now().toString(),
       timestamp: Date.now(),
       description,
-      image: image,
+      image: image || '', // Aseguramos que no sea null
       location,
       status: isOnline ? 'sent' : 'pending',
       severityAnalysis: '',
@@ -118,8 +118,10 @@ const ClientView: React.FC<Props> = ({ onReportSubmit }) => {
     
     setImage(null);
     setDescription('');
+    setName(''); // Limpiamos también el nombre
+    setPhone(''); // y el teléfono
     setLocation({ isManual: false });
-    alert(isOnline ? "Reporte enviado con éxito." : "Reporte guardado localmente. Se enviará cuando recuperes conexión.");
+    alert(isOnline ? "Reporte enviado con éxito." : "Reporte guardado localmente.");
   };
 
   return (
@@ -289,7 +291,7 @@ const ClientView: React.FC<Props> = ({ onReportSubmit }) => {
       </div>
 
       <ChatBot 
-          onLocationDetected={(lat, lng) => {
+          onLocationFound={(lat: number, lng: number) => {
           setLocation({ latitude: lat, longitude: lng, isManual: false });
           }} 
       />

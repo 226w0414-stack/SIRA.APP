@@ -87,7 +87,7 @@ const AdminView: React.FC<Props> = ({ reports, onFinalize, onDispatch }) => {
                     style={{ border: 0 }}
                     loading="lazy"
                     allowFullScreen
-                    src={`https://www.google.com/maps/embed/v1/view?key=TU_API_KEY_O_URL_EMBED&center=${report.location.latitude},${report.location.longitude}&zoom=16`}
+                    src={`https://www.google.com/search?q=https://maps.google.com/maps%3Fq%3D${report.location.latitude},${report.location.longitude}&z=15&output=embed`}
                   ></iframe>
                 </div>
                 <div className="mt-4 flex gap-2">

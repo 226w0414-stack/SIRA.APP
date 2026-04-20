@@ -103,7 +103,7 @@ const AdminView: React.FC<Props> = ({ reports, onFinalize, onDispatch }) => {
                   </p>
                   <iframe
                     width="100%"
-                    height="100%"
+                    height="150%"
                     frameBorder="0"
                     src={`https://maps.google.com/maps?q=${report.location.latitude},${report.location.longitude}&z=15&output=embed`}
                     allowFullScreen

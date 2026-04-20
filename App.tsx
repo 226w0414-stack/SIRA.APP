@@ -27,6 +27,33 @@ const Navigation = () => {
     );
   }
 
+  // Dentro de tu componente Navigation, en la parte que NO es admin:
+  if (!isAdmin) {
+    return (
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t z-50">
+        <div className="flex justify-around items-center h-16">
+          <Link to="/" className="...">Reportar</Link>
+          <Link to="/mis-reportes" className="...">Mis Reportes</Link>
+
+          {/* BOTÓN SECRETO PARA ADMIN */}
+          <Link 
+            to="/admin" 
+            onClick={(e) => {
+              const pass = prompt("Clave:");
+              if(pass !== "1234") e.preventDefault(); // Cancela el viaje si la clave es mal
+            }}
+            className="flex flex-col items-center flex-1 py-2 text-slate-400 opacity-20 hover:opacity-100"
+          >
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002-2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <span className="text-[10px] mt-1">Admin</span>
+          </Link>
+        </div>
+      </nav>
+    );
+  }
+
   // Navegación exclusiva para el CLIENTE
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-[#003366] text-white border-t border-[#FF8C00]/30 z-50">

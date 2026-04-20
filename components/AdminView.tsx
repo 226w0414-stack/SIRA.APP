@@ -77,15 +77,18 @@ const AdminView: React.FC<Props> = ({ reports, onFinalize, onDispatch }) => {
                     {report.location.manualAddress && ` - ${report.location.manualAddress}`}
                   </span>
                 </div>
-                <div className="mt-3 w-full h-32 rounded-lg overflow-hidden border border-slate-200">
+                <div className="mt-4 rounded-xl border border-slate-200 overflow-hidden shadow-inner bg-slate-100">
+                  <p className="text-[10px] font-bold text-slate-500 p-2 bg-slate-50 border-b italic">
+                  📍 UBICACIÓN EN TIEMPO REAL
+                  </p>
                   <iframe
                     width="100%"
-                    height="100%"
-                    frameBorder="0"
-                    src={`https://maps.google.com/maps?q=${report.location.latitude},${report.location.longitude}&z=15&output=embed`}
+                    height="150"
+                    style={{ border: 0 }}
+                    loading="lazy"
                     allowFullScreen
-                  >
-                  </iframe>
+                    src={`https://www.google.com/maps/embed/v1/view?key=TU_API_KEY_O_URL_EMBED&center=${report.location.latitude},${report.location.longitude}&zoom=16`}
+                  ></iframe>
                 </div>
                 <div className="mt-4 flex gap-2">
                   {/* Botón Despachar: Se deshabilita o cambia si ya está en camino */}

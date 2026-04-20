@@ -73,6 +73,25 @@ const ChatBot: React.FC<Props> = ({ onLocationFound }) => {
     }
   };
 
+  const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+  const startListening = () => {
+    if (!SpeechRecognition){
+      alert("Tu navegador no soporta dictado por voz.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'es-MX';
+    recognition.continuous = false; //se detiene si dejas de hablar
+    
+    recognition.onresult = (event: any) => {
+      const textoVoz = event.results[0][0].transcript;
+      setMessages(textoVoz); // Esto pone lo que dijiste en el input
+    };
+
+    recognition.start();
+  };
+
   return (
     <>
       {/* Botón Flotante con branding de Veracruz */}
@@ -174,6 +193,7 @@ const ChatBot: React.FC<Props> = ({ onLocationFound }) => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                 </svg>
               </button>
+              <button onClick={startListening}> 🎤 </button>
             </div>
             <p className="text-[9px] text-center text-slate-400 mt-2 font-medium">En caso de emergencia vital llame siempre al 911</p>
           </div>

@@ -77,6 +77,16 @@ const AdminView: React.FC<Props> = ({ reports, onFinalize, onDispatch }) => {
                     {report.location.manualAddress && ` - ${report.location.manualAddress}`}
                   </span>
                 </div>
+                <div className="mt-3 w-full h-32 rounded-lg overflow-hidden border border-slate-200">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    frameBorder="0"
+                    src={`https://maps.google.com/maps?q=${report.location.latitude},${report.location.longitude}&z=15&output=embed`}
+                    allowFullScreen
+                  >
+                  </iframe>
+                </div>
                 <div className="mt-4 flex gap-2">
                   {/* Botón Despachar: Se deshabilita o cambia si ya está en camino */}
                   <button

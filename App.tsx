@@ -6,6 +6,7 @@ import AdminView from './components/AdminView';
 import MyReportsView from './components/MyReportsView';
 import { IncidentReport } from './types';
 import { API_BASE_URL } from './config';
+import LoginView from './components/loginView';
 
 const Navigation = () => {
   const location = useLocation();
@@ -101,8 +102,14 @@ const Header = () => {
 
 const App: React.FC = () => {
   const [reports, setReports] = useState<IncidentReport[]>([]);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
+  // Comprueba si hay una sesión guardada cuando se abre la app
   useEffect(() => {
+    const savedUser = localStorage.getItem('sira_user');
+    if (savedUser) {
+      setCurrentUser(JSON.parse(savedUser));
+    }
     const fetchReportsFromServer = async() => {
       try {
         const response = await fetch(`${API_BASE_URL}/get_reports.php`, {
@@ -122,6 +129,19 @@ const App: React.FC = () => {
     };
     fetchReportsFromServer();
   }, []);
+  
+  // Función cuando el login es exitoso
+  const handleLoginSuccess = (user: any) => {
+    setCurrentUser(user);
+    localStorage.setItem('sira_user', JSON.stringify(user));
+  };
+
+  // Función para modo invitado
+  const handleGuestAccess = () => {
+    const guestUser = { curp: 'INVITADO', rol: 'ciudadano', primer_nombre: 'Invitado' };
+    setCurrentUser(guestUser);
+    // No lo guardamos en localStorage para que la próxima vez vuelva a pedir login
+  };
 
   const handleAddReport = async (newReport: IncidentReport) => {
     console.log("Enviando reporte:", newReport);
@@ -204,22 +224,29 @@ const App: React.FC = () => {
 
   return (
     <HashRouter>
-      <div className="min-h-screen flex flex-col pb-16 bg-slate-50 selection:bg-orange-200">
-        <Header />
-        <main className="flex-1 overflow-auto max-w-2xl mx-auto w-full">
-          <Routes>
-            {/* Rutas del Cliente */}
-            <Route path="/" element={<ClientView onReportSubmit={handleAddReport} />} />
-            <Route path="/mis-reportes" element={<MyReportsView reports={reports} />} />
-            
-            {/* Ruta de Protección Civil (Oculta del menú del cliente) */}
-            <Route
-            path="/admin"
-            element={<AdminView reports={reports} onFinalize={handleFinalizeReport} onDispatch={handleDispatchUnit} />} />
-          </Routes>
-        </main>
-        <Navigation />
-      </div>
+      {!currentUser ? (
+        // Si no hay usuario logueado, mostramos la pantalla de Login
+        <LoginView onLoginSuccess={handleLoginSuccess} onGuestAccess={handleGuestAccess} />
+      ) : (
+        // Si YA hay usuario logueado, mostramos TODO tu código intacto
+        <div className="min-h-screen flex flex-col pb-16 bg-slate-50 selection:bg-orange-200">
+          <Header />
+          <main className="flex-1 overflow-auto max-w-2xl mx-auto w-full">
+            <Routes>
+              {/* Rutas del Cliente */}
+              <Route path="/" element={<ClientView onReportSubmit={handleAddReport} />} />
+              <Route path="/mis-reportes" element={<MyReportsView reports={reports} />} />
+              
+              {/* Ruta de Protección Civil (Oculta del menú del cliente) */}
+              <Route
+                path="/admin"
+                element={<AdminView reports={reports} onFinalize={handleFinalizeReport} onDispatch={handleDispatchUnit} />} 
+              />
+            </Routes>
+          </main>
+          <Navigation />
+        </div>
+      )}
     </HashRouter>
   );
 };

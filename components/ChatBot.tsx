@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { getAiResponse } from '../services/geminiService';
 import { ChatMessage } from '../types';
+import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 
 interface Props {
   onLocationFound?: (lat: number, lng: number) => void;
@@ -73,23 +74,50 @@ const ChatBot: React.FC<Props> = ({ onLocationFound }) => {
     }
   };
 
-  const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-  const startListening = () => {
-    if (!SpeechRecognition){
-      alert("Tu navegador no soporta dictado por voz.");
-      return;
+  const startListening = async () => {
+    try {
+      // 1. Verificar si el celular tiene el motor de voz disponible
+      const available = await SpeechRecognition.available();
+      
+      if (available.available) {
+        // 2. Pedir permiso para usar el micrófono en el teléfono
+        const status = await SpeechRecognition.requestPermissions();
+        if (status.speechRecognition !== 'granted') {
+        alert("Se requieren permisos de micrófono para dictar.");
+        return;
+        }
+
+        // 3. Comenzar a escuchar el audio en español
+        SpeechRecognition.start({
+          language: "es-MX",
+          maxResults: 1,
+          partialResults: false,
+        });
+
+        // 4. Capturar el resultado y ponerlo en el input del chat
+        SpeechRecognition.addListener("partialResults", (data: any) => {
+          if (data.matches && data.matches.length > 0) {
+            // Cambia 'setInput' por la variable que uses para el texto del chat
+            setInput(data.matches[0]); 
+          }
+        });
+      } else {
+        // FALLBACK: Si está en computadora (Netlify), usa el método tradicional
+        const WebSpeech = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        if (!WebSpeech) {
+          alert("Dictado por voz no soportado en este navegador.");
+          return;
+        }
+        const recognition = new WebSpeech();
+        recognition.lang = 'es-MX';
+        recognition.onresult = (event: any) => {
+          setInput(event.results[0][0].transcript);
+        };
+        recognition.start();
+      }
+    } catch (error) {
+      console.error("Error en dictado por voz:", error);
     }
-
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'es-MX';
-    recognition.continuous = false; //se detiene si dejas de hablar
-    
-    recognition.onresult = (event: any) => {
-      const textoVoz = event.results[0][0].transcript;
-      setMessages(textoVoz); // Esto pone lo que dijiste en el input
-    };
-
-    recognition.start();
   };
 
   return (

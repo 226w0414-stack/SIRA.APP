@@ -72,30 +72,94 @@ const Navigation = () => {
 const Header = () => {
   const location = useLocation();
   const isAdmin = location.pathname === '/admin';
+  
+  // Estado para el modo oscuro
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Verificamos el tema guardado al cargar la cabecera
+  useEffect(() => {
+    if (localStorage.theme === 'dark') {
+      document.documentElement.classList.add('dark');
+      setIsDarkMode(true);
+    } else {
+      document.documentElement.classList.remove('dark');
+      setIsDarkMode(false);
+    }
+  }, []);
+
+  // Función para alternar el modo oscuro
+  const toggleDarkMode = () => {
+    if (isDarkMode) {
+      document.documentElement.classList.remove('dark');
+      localStorage.theme = 'light';
+      setIsDarkMode(false);
+    } else {
+      document.documentElement.classList.add('dark');
+      localStorage.theme = 'dark';
+      setIsDarkMode(true);
+    }
+  };
+
+  // Función para cerrar sesión
+  const handleLogout = () => {
+    const confirmar = window.confirm("¿Estás seguro de que deseas cerrar sesión?");
+    if (confirmar) {
+      localStorage.removeItem('sira_user');
+      window.location.reload(); // Recarga la app para volver al Login
+    }
+  };
 
   return (
-    <header className={`${isAdmin ? 'bg-[#002244]' : 'bg-[#003366]'} text-white p-4 shadow-md sticky top-0 z-50 flex items-center justify-between border-b-4 border-[#FF8C00]`}>
-      <div className="flex items-center gap-3">
-        <Link to="/" className="w-10 h-10 bg-white rounded-full flex items-center justify-center p-1 border border-slate-200 shadow-inner">
-          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjhGfi9MlZ3jVzjEh-a7wN9adjgEJ1dxN2aw&s" alt="PC Logo" className="w-full h-full object-contain" />
-        </Link>
-        <div>
-          <h1 className="text-lg font-black leading-none tracking-tight">ALERTA VERACRUZ</h1>
-          <p className="text-[9px] tracking-widest text-orange-400 font-bold mt-1 uppercase">
-            {isAdmin ? 'MÓDULO DE INTELIGENCIA Y DESPACHO' : 'H. AYUNTAMIENTO DE VERACRUZ'}
-          </p>
+    <header className={`${isAdmin ? 'bg-[#002244] dark:bg-slate-950' : 'bg-[#003366] dark:bg-slate-900'} text-white shadow-md sticky top-0 z-50 flex flex-col border-b-4 border-[#FF8C00] transition-colors duration-300`}>
+      
+      {/* Fila superior: Logo y 911 */}
+      <div className="p-4 flex justify-between items-center w-full">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-orange-100 rounded-full border-2 border-[#FF8C00] flex items-center justify-center">
+            <span className="text-xl">🛡️</span>
+          </div>
+          <div>
+            <h1 className="text-lg font-black tracking-widest leading-none">ALERTA VERACRUZ</h1>
+            <p className="text-[10px] text-slate-300">
+              {isAdmin ? 'MÓDULO DE INTELIGENCIA' : 'H. AYUNTAMIENTO'}
+            </p>
+          </div>
         </div>
-      </div>
-      <div className="text-right">
-        {!isAdmin ? (
-          <>
-            <div className="text-[10px] uppercase font-bold text-orange-400">Emergencias</div>
-            <a href="tel:911" className="text-xl font-black text-white active:text-orange-300 transition-colors">911</a>
-          </>
-        ) : (
-          <div className="bg-orange-500 text-white text-[10px] font-black px-2 py-1 rounded">PC-ADMIN</div>
+
+        {/* Botón de Emergencias con enlace telefónico nativo */}
+        {!isAdmin && (
+          <a href="tel:911" className="bg-red-600 hover:bg-red-700 text-white font-black py-1 px-4 rounded-xl text-xl transition-colors shadow-lg flex items-center gap-1">
+            <span className="text-sm font-normal mr-1 hidden sm:inline">EMERGENCIAS</span> 911
+          </a>
         )}
       </div>
+
+      {/* Fila inferior: Barra de herramientas (Mockup 3) */}
+      <div className="bg-black/20 px-4 py-2 flex justify-between items-center text-sm w-full">
+        <div className="flex gap-4">
+          <button className="hover:text-[#FF8C00] transition-colors flex items-center gap-1">
+            👤 <span className="hidden sm:inline">Perfil</span>
+          </button>
+          <button className="hover:text-[#FF8C00] transition-colors flex items-center gap-1 relative">
+            🔔 <span className="hidden sm:inline">Avisos</span>
+            {/* Indicador rojo de notificación */}
+            <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[8px] font-bold px-1 rounded-full">1</span>
+          </button>
+        </div>
+
+        <div className="flex gap-4 items-center">
+          <button onClick={toggleDarkMode} className="text-lg hover:scale-110 transition-transform" title="Alternar modo oscuro">
+            {isDarkMode ? '☀️' : '🌙'}
+          </button>
+          <button onClick={() => window.location.reload()} className="hover:text-slate-300 transition-colors" title="Actualizar página">
+            🔄
+          </button>
+          <button onClick={handleLogout} className="hover:text-red-400 transition-colors" title="Cerrar sesión">
+            🚪
+          </button>
+        </div>
+      </div>
+
     </header>
   );
 };
@@ -229,7 +293,7 @@ const App: React.FC = () => {
         <LoginView onLoginSuccess={handleLoginSuccess} onGuestAccess={handleGuestAccess} />
       ) : (
         // Si YA hay usuario logueado, mostramos TODO tu código intacto
-        <div className="min-h-screen flex flex-col pb-16 bg-slate-50 selection:bg-orange-200">
+          <div className="min-h-screen flex flex-col pb-16 bg-slate-50 dark:bg-slate-900 dark:text-white selection:bg-orange-200 transition-colors duration-300">          
           <Header />
           <main className="flex-1 overflow-auto max-w-2xl mx-auto w-full">
             <Routes>

@@ -16,11 +16,19 @@ const ChatBot: React.FC<Props> = ({ onLocationFound }) => {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [speakingIndex, setSpeakingIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
+
+    return () => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
   }, [messages, isTyping]);
 
   const handleSend = async (textToSend?: string) => {
@@ -120,6 +128,48 @@ const ChatBot: React.FC<Props> = ({ onLocationFound }) => {
     }
   };
 
+  // Función principal de reproducción/pausa
+  const handleToggleSpeech = (text: string, index: number) => {
+    // Verificamos si el celular/navegador soporta la API
+    if (!('speechSynthesis' in window)) {
+      alert("Tu dispositivo no soporta la síntesis de voz nativa.");
+      return;
+    }
+
+    // Si el usuario le da clic al botón mientras ya está hablando ese mismo mensaje, lo pausamos/detenemos
+    if (isSpeaking && speakingIndex === index) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      setSpeakingIndex(null);
+      return;
+    }
+
+    // Cancelamos cualquier audio anterior por seguridad
+    window.speechSynthesis.cancel();
+
+    // Configuramos la nueva voz
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'es-MX'; // Español de México
+    utterance.rate = 1.0;     // Velocidad normal
+
+    // Evento: Cuando el bot termina de hablar naturalmente
+    utterance.onend = () => {
+      setIsSpeaking(false);
+      setSpeakingIndex(null);
+    };
+
+    // Evento: Si ocurre un error
+    utterance.onerror = () => {
+      setIsSpeaking(false);
+      setSpeakingIndex(null);
+    };
+
+    // Activamos la voz y actualizamos los estados visuales
+    setIsSpeaking(true);
+    setSpeakingIndex(index);
+    window.speechSynthesis.speak(utterance);
+  };
+
   return (
     <>
       {/* Botón Flotante con branding de Veracruz */}
@@ -160,16 +210,30 @@ const ChatBot: React.FC<Props> = ({ onLocationFound }) => {
           {/* Área de Mensajes */}
           <div ref={scrollRef} className="flex-1 p-5 overflow-auto space-y-4 bg-slate-50">
             {messages.map((m, i) => (
-              <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] p-4 rounded-2xl text-sm shadow-sm leading-relaxed ${
-                  m.role === 'user' 
-                  ? 'bg-[#FF8C00] text-white rounded-tr-none' 
-                  : 'bg-white text-slate-700 rounded-tl-none border border-slate-200'
-                }`}>
-                  {m.text}
-                </div>
+              <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
+                {/* Burbuja del mensaje */}
+                <div className={`p-3 rounded-xl max-w-[85%] shadow-sm ${m.role === 'user' ? 'bg-[#FF8C00] text-white' : 'bg-slate-200 text-slate-800'}`}>
+                  {/* Texto del mensaje */}
+                  <p className="text-sm">{m.text}</p>
+                  {/* BOTÓN DE VOZ */}
+                  {m.role === 'model' && (
+                    <button 
+                      onClick={() => handleToggleSpeech(m.text, i)}
+                      className="mt-2 text-xs flex items-center gap-1 bg-slate-300 hover:bg-slate-400 text-slate-700 py-1 px-2 rounded-lg transition-colors font-medium"
+                      title="Escuchar respuesta"
+                    >
+                      {isSpeaking && speakingIndex === i ? (
+                        <><span>⏹️</span></>
+                      ) : (
+                        <><span>🔊</span></>
+                      )}
+                    </button>
+                  )}
+
               </div>
-            ))}
+            </div>
+          ))}
+            
             {isTyping && (
               <div className="flex justify-start">
                 <div className="bg-white p-4 rounded-2xl rounded-tl-none border border-slate-200 flex gap-1.5 shadow-sm">

@@ -1,12 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import LoginView from './components/LoginView';
 import ClientView from './components/ClientView';
-import AdminView from './components/AdminView';
 import MyReportsView from './components/MyReportsView';
+import AdminView from './components/AdminView';
+import ProfileView from './components/ProfileView';
 import { IncidentReport } from './types';
 import { API_BASE_URL } from './config';
-import LoginView from './components/LoginView';
 
 const Navigation = () => {
   const location = useLocation();
@@ -69,11 +70,9 @@ const Navigation = () => {
   );
 };
 
-const Header = () => {
+const Header = ({ onOpenProfile }: { onOpenProfile: () => void }) => {
   const location = useLocation();
   const isAdmin = location.pathname === '/admin';
-  
-  // Estado para el modo oscuro
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Verificamos el tema guardado al cargar la cabecera
@@ -105,7 +104,7 @@ const Header = () => {
     const confirmar = window.confirm("¿Estás seguro de que deseas cerrar sesión?");
     if (confirmar) {
       localStorage.removeItem('sira_user');
-      window.location.reload(); // Recarga la app para volver al Login
+      window.location.reload();
     }
   };
 
@@ -137,7 +136,7 @@ const Header = () => {
       {/* Fila inferior: Barra de herramientas (Mockup 3) */}
       <div className="bg-black/20 px-4 py-2 flex justify-between items-center text-sm w-full">
         <div className="flex gap-4">
-          <button className="hover:text-[#FF8C00] transition-colors flex items-center gap-1">
+          <button onClick={onOpenProfile} className="hover:text-[#FF8C00] transition-colors flex items-center gap-1">
             👤 <span className="hidden sm:inline">Perfil</span>
           </button>
           <button className="hover:text-[#FF8C00] transition-colors flex items-center gap-1 relative">
@@ -165,8 +164,9 @@ const Header = () => {
 };
 
 const App: React.FC = () => {
-  const [reports, setReports] = useState<IncidentReport[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [reports, setReports] = useState<IncidentReport[]>([]);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   // Comprueba si hay una sesión guardada cuando se abre la app
   useEffect(() => {
@@ -205,6 +205,11 @@ const App: React.FC = () => {
     const guestUser = { curp: 'INVITADO', rol: 'ciudadano', primer_nombre: 'Invitado' };
     setCurrentUser(guestUser);
     // No lo guardamos en localStorage para que la próxima vez vuelva a pedir login
+  };
+
+  const handleProfileUpdate = (updatedUser: any) => {
+    setCurrentUser(updatedUser);
+    localStorage.setItem('sira_user', JSON.stringify(updatedUser));
   };
 
   const handleAddReport = async (newReport: IncidentReport) => {
@@ -289,18 +294,17 @@ const App: React.FC = () => {
   return (
     <HashRouter>
       {!currentUser ? (
-        // Si no hay usuario logueado, mostramos la pantalla de Login
         <LoginView onLoginSuccess={handleLoginSuccess} onGuestAccess={handleGuestAccess} />
       ) : (
-        // Si YA hay usuario logueado, mostramos TODO tu código intacto
-          <div className="min-h-screen flex flex-col pb-16 bg-slate-50 dark:bg-slate-900 dark:text-white selection:bg-orange-200 transition-colors duration-300">          
-          <Header />
+        <div className="min-h-screen flex flex-col pb-16 bg-slate-50 dark:bg-slate-900 dark:text-white selection:bg-orange-200 transition-colors duration-300">
+          {/* Le pasamos la función al Header para que sepa cómo abrir el perfil */}
+          <Header onOpenProfile={() => setIsProfileOpen(true)} />
+          
           <main className="flex-1 overflow-auto max-w-2xl mx-auto w-full">
             <Routes>
               {/* Rutas del Cliente */}
               <Route path="/" element={<ClientView onReportSubmit={handleAddReport} />} />
               <Route path="/mis-reportes" element={<MyReportsView reports={reports} />} />
-              
               {/* Ruta de Protección Civil (Oculta del menú del cliente) */}
               <Route
                 path="/admin"
@@ -309,6 +313,16 @@ const App: React.FC = () => {
             </Routes>
           </main>
           <Navigation />
+
+          {/* RENDERIZADO CONDICIONAL DEL PERFIL */}
+          {isProfileOpen && (
+            <ProfileView 
+              user={currentUser} 
+              onProfileUpdate={handleProfileUpdate} 
+              onClose={() => setIsProfileOpen(false)} 
+            />
+          )}
+
         </div>
       )}
     </HashRouter>

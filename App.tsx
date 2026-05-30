@@ -6,7 +6,7 @@ import AdminView from './components/AdminView';
 import MyReportsView from './components/MyReportsView';
 import { IncidentReport } from './types';
 import { API_BASE_URL } from './config';
-import LoginView from './components/loginView';
+import LoginView from './components/LoginView';
 
 const Navigation = () => {
   const location = useLocation();

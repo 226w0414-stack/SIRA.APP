@@ -122,10 +122,11 @@ const LoginView: React.FC<Props> = ({ onLoginSuccess, onGuestAccess }) => {
         
         {error && <div className="mb-4 p-3 bg-red-100 text-red-700 text-sm rounded-lg text-center">{error}</div>}
 
-        {/* --- PASO 1: PEDIR CURP --- */}
+        {/* --- PEDIR CURP --- */}
         {step === 1 && (
           <form onSubmit={handleVerificarCurp} className="space-y-4">
             <p className="text-center text-sm text-slate-500 mb-6">Ingresa tu CURP para continuar con el reporte o ver tu historial.</p>
+            
             <input
               type="text"
               placeholder="ESCRIBE TU CURP"
@@ -135,27 +136,55 @@ const LoginView: React.FC<Props> = ({ onLoginSuccess, onGuestAccess }) => {
               maxLength={18}
               required
             />
+            
+            {/* Botón principal */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#003366] text-white font-bold py-4 rounded-xl hover:bg-[#002244] transition-colors disabled:opacity-50"
+              className="w-full bg-[#003366] text-white font-bold py-4 rounded-xl hover:bg-[#002244] transition-colors disabled:opacity-50 shadow-md"
             >
               {loading ? 'Verificando...' : 'CONTINUAR'}
             </button>
             
-            <div className="pt-6 border-t border-slate-100">
-              <button 
-                type="button" 
-                onClick={onGuestAccess}
-                className="w-full bg-slate-100 text-slate-600 font-bold py-3 rounded-xl hover:bg-slate-200 transition-colors text-sm"
+            {/* Botón de Soporte Técnico */}
+            <button
+              type="button"
+              onClick={() => alert("Módulo de soporte técnico en construcción.")}
+              className="w-full bg-[#FFC107] text-[#003366] font-bold py-3 rounded-xl hover:bg-[#ffb300] transition-colors text-xs flex items-center justify-center gap-2 shadow-sm"
+            >
+              <span className="text-sm">❓</span> ¿PROBLEMAS PARA ACCEDER? SOPORTE TÉC.
+            </button>
+
+            {/* Divisor Visual */}
+            <div className="relative flex py-2 items-center">
+              <div className="flex-grow border-t border-slate-200"></div>
+              <span className="flex-shrink-0 mx-4 text-slate-400 text-[10px] font-bold tracking-widest uppercase">O entra como invitado</span>
+              <div className="flex-grow border-t border-slate-200"></div>
+            </div>
+
+            {/* Botón de Invitado */}
+            <button 
+              type="button" 
+              onClick={onGuestAccess}
+              className="w-full bg-slate-100 text-slate-600 font-bold py-3 rounded-xl hover:bg-slate-200 transition-colors text-sm"
+            >
+              Continuar sin Identificación
+            </button>
+
+            {/* Enlace PC-ADMIN */}
+            <div className="mt-6 pt-4 text-center">
+              <button
+                type="button"
+                onClick={() => alert("El login de PC se maneja por su ruta protegida en /admin")}
+                className="text-orange-600 font-bold text-[10px] tracking-widest uppercase hover:underline flex items-center justify-center gap-1 mx-auto"
               >
-                Continuar sin Identificación (Invitado)
+                <span className="text-sm">🔒</span> ACCESO PC-ADMIN
               </button>
             </div>
           </form>
         )}
 
-        {/* --- PASO 2: LOGIN (Usuario existe) --- */}
+        {/* --- LOGIN --- */}
         {step === 2 && (
           <form onSubmit={handleAuth} className="space-y-4">
             <p className="text-center text-sm text-slate-500 mb-6">¡Hola de nuevo! Ingresa tu teléfono para verificar tu identidad.</p>
@@ -184,7 +213,7 @@ const LoginView: React.FC<Props> = ({ onLoginSuccess, onGuestAccess }) => {
           </form>
         )}
 
-        {/* --- PASO 3: REGISTRO (Usuario nuevo) --- */}
+        {/* --- REGISTRO --- */}
         {step === 3 && (
           <form onSubmit={handleAuth} className="space-y-4">
             <p className="text-center text-sm text-slate-500 mb-4">Por favor verifica o escribe tu nombre completo.</p>

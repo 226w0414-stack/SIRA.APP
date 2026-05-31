@@ -11,9 +11,10 @@ interface User {
 interface Props {
   onLoginSuccess: (user: User) => void;
   onGuestAccess: () => void;
+  onAdminAccess: () => void;
 }
 
-const LoginView: React.FC<Props> = ({ onLoginSuccess, onGuestAccess }) => {
+const LoginView: React.FC<Props> = ({ onLoginSuccess, onGuestAccess, onAdminAccess }) => {
   // Estados para controlar el flujo
   const [step, setStep] = useState<1 | 2 | 3>(1); // 1: CURP, 2: Login, 3: Registro
   const [loading, setLoading] = useState(false);
@@ -175,7 +176,7 @@ const LoginView: React.FC<Props> = ({ onLoginSuccess, onGuestAccess }) => {
             <div className="mt-6 pt-4 text-center">
               <button
                 type="button"
-                onClick={() => alert("El login de PC se maneja por su ruta protegida en /admin")}
+                onClick={onAdminAccess}
                 className="text-orange-600 font-bold text-[10px] tracking-widest uppercase hover:underline flex items-center justify-center gap-1 mx-auto"
               >
                 <span className="text-sm">🔒</span> ACCESO PC-ADMIN

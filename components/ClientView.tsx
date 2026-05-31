@@ -82,7 +82,7 @@ const ClientView: React.FC<Props> = ({ onReportSubmit }) => {
     } finally {
       setIsLocating(false);
     }
-  }; // <--- REVISA QUE ESTA LLAVE ESTÉ AQUÍ
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

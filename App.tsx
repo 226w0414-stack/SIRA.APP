@@ -6,6 +6,7 @@ import ClientView from './components/ClientView';
 import MyReportsView from './components/MyReportsView';
 import AdminView from './components/AdminView';
 import ProfileView from './components/ProfileView';
+import AdminLoginView from './components/AdminLoginView';
 import { IncidentReport } from './types';
 import { API_BASE_URL } from './config';
 
@@ -167,6 +168,7 @@ const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [reports, setReports] = useState<IncidentReport[]>([]);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
 
   // Comprueba si hay una sesión guardada cuando se abre la app
   useEffect(() => {
@@ -198,6 +200,13 @@ const App: React.FC = () => {
   const handleLoginSuccess = (user: any) => {
     setCurrentUser(user);
     localStorage.setItem('sira_user', JSON.stringify(user));
+  };
+
+  const handleAdminLogin = (adminUser: any) => {
+    setCurrentUser(adminUser);
+    localStorage.setItem('sira_user', JSON.stringify(adminUser));
+    // Redirección forzada usando HashRouter
+    window.location.hash = '/admin'; 
   };
 
   // Función para modo invitado
@@ -294,7 +303,19 @@ const App: React.FC = () => {
   return (
     <HashRouter>
       {!currentUser ? (
-        <LoginView onLoginSuccess={handleLoginSuccess} onGuestAccess={handleGuestAccess} />
+        // Si NO hay usuario, decidimos qué pantalla de login mostrar
+        showAdminLogin ? (
+          <AdminLoginView 
+          onAdminLogin={handleAdminLogin} 
+          onCancel={() => setShowAdminLogin(false)} 
+          />
+        ) : (
+        <LoginView
+        onLoginSuccess={handleLoginSuccess}
+        onGuestAccess={handleGuestAccess}
+        onAdminAccess={() => setShowAdminLogin(true)}
+        />
+        )
       ) : (
         <div className="min-h-screen flex flex-col pb-16 bg-slate-50 dark:bg-slate-900 dark:text-white selection:bg-orange-200 transition-colors duration-300">
           {/* Le pasamos la función al Header para que sepa cómo abrir el perfil */}

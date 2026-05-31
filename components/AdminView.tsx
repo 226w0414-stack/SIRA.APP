@@ -1,5 +1,5 @@
-
-import React from 'react';
+import React, { useState } from 'react';
+import AdminUsersView from './AdminUsersView';
 import { IncidentReport } from '../types';
 
 interface Props {
@@ -9,112 +9,136 @@ interface Props {
 }
 
 const AdminView: React.FC<Props> = ({ reports, onFinalize, onDispatch }) => {
+  // Estado para controlar qué módulo del panel administrativo está activo
+  const [activeModule, setActiveModule] = useState<'reportes' | 'soporte' | 'usuarios'>('reportes');
+
+  // Helper para renderizar los estados del reporte
+  const getStatusBadge = (status?: string) => {
+    switch (status) {
+      case 'en_camino':
+      case 'atendiendo':
+        return <span className="bg-orange-100 text-orange-700 text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-wider">ATENDIENDO 🚒</span>;
+      case 'sent':
+      case 'recibido':
+      default:
+        return <span className="bg-blue-100 text-blue-700 text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-wider">RECIBIDO 📥</span>;
+    }
+  };
+
   return (
-    <div className="p-4 space-y-4">
-      <div className="bg-[#003366] text-white p-4 rounded-xl shadow-md">
-        <h2 className="text-xl font-bold flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-          </svg>
-          Monitor de Percances
-        </h2>
-        <p className="text-sm opacity-80 mt-1">Reportes ciudadanos en tiempo real</p>
+    <div className="p-4 space-y-4 animate-in fade-in duration-500">
+      
+      {/* MENÚ DE NAVEGACIÓN ADMINISTRATIVA (TABS) */}
+      <div className="bg-[#003366] p-2 rounded-2xl shadow-md border-b-4 border-[#FF8C00] flex justify-between items-center overflow-x-auto">
+        <div className="flex gap-2 min-w-max">
+          <button 
+            onClick={() => setActiveModule('reportes')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-2 ${activeModule === 'reportes' ? 'bg-white text-[#003366]' : 'text-slate-300 hover:bg-[#002244]'}`}
+          >
+            <span>📄</span> Reportes
+          </button>
+          
+          <button 
+            onClick={() => setActiveModule('usuarios')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-2 ${activeModule === 'usuarios' ? 'bg-white text-[#003366]' : 'text-slate-300 hover:bg-[#002244]'}`}
+          >
+            <span>👥</span> Usuarios y Alertas
+          </button>
+
+          <button 
+            onClick={() => setActiveModule('soporte')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-2 ${activeModule === 'soporte' ? 'bg-white text-[#003366]' : 'text-slate-300 hover:bg-[#002244]'}`}
+          >
+            <span>🎧</span> Soporte
+          </button>
+        </div>
       </div>
 
-      <div className="space-y-4">
-        {reports.length === 0 ? (
-          <div className="text-center py-20 text-slate-400">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0l-8 4-8-4" />
-            </svg>
-            <p className="mt-4">No hay reportes recientes.</p>
+      {/* RENDERIZADO CONDICIONAL DE MÓDULOS */}
+
+      {/* REPORTES CIUDADANOS */}
+      {activeModule === 'reportes' && (
+        <div className="space-y-4 animate-in slide-in-from-left-4 duration-300">
+          <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+            <h2 className="text-xl font-bold flex items-center gap-2 text-[#003366]">
+              <span className="text-orange-500">🚨</span> Monitor de Percances
+            </h2>
+            <p className="text-sm text-slate-500 mt-1">Reportes ciudadanos en tiempo real</p>
           </div>
-        ) : (
-          reports.map((report) => (
-            <div 
-              key={report.id} 
-              // Estado = 'en camino' -> resalta el reporte en naranja para indicar que ya se está atendiendo
-              className={`bg-white rounded-xl shadow border-2 overflow-hidden flex flex-col md:flex-row transition-all ${
-                report.estado === 'en_camino' 
-                ? 'border-orange-400 bg-orange-50/50' 
-                : 'border-slate-200'
-              }`}
-            >
-              <div className="md:w-1/3 aspect-video md:aspect-auto">
-                <img src={report.image} alt="Incidente" className="w-full h-full object-cover" />
+
+          <div className="space-y-4">
+            {reports.length === 0 ? (
+              <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-slate-200">
+                <span className="text-4xl opacity-50 block mb-2">📭</span>
+                <p className="text-slate-400 font-medium">No hay reportes recientes.</p>
               </div>
-              <div className="p-4 flex-1">
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex gap-2">
-                    {/* Etiqueta de sincronizacion*/}
-                  <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${report.status === 'sent' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                    {report.status === 'sent' ? 'Recibido' : 'Pendiente'}
-                  </span>
-                  {/* Nueva Etiqueta: Estado de atención */}
-                  {report.estado === 'en_camino' && (
-                    <span className="px-2 py-1 rounded text-[10px] font-bold uppercase bg-orange-500 text-white animate-pulse">
-                      ⚠️ Unidad en Camino
-                      </span>
-                      )}
+            ) : (
+              reports.map((report) => (
+                <div key={report.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col md:flex-row hover:shadow-md transition-shadow">
+                  
+                  {/* Imagen del Reporte */}
+                  {report.image && (
+                    <div className="md:w-1/3 aspect-video md:aspect-auto bg-slate-100 shrink-0">
+                      <img src={report.image} alt="Incidente" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+
+                  <div className="p-5 flex-1 flex flex-col justify-between">
+                    <div>
+                      <div className="flex justify-between items-start mb-3">
+                        {getStatusBadge(report.status)}
+                        <span className="text-xs font-bold text-slate-400">{report.timestamp ? new Date(report.timestamp).toLocaleString() : ''}</span>
+                      </div>
+                      
+                      <h3 className="font-black text-[#003366] text-lg leading-tight uppercase mb-2">{report.description}</h3>
+                      
+                      <div className="flex items-start gap-2 text-xs text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        <span className="text-[#FF8C00] shrink-0">📍</span>
+                        <span className="font-medium">
+                          {report.location?.manualAddress || (report.location?.latitude && report.location?.longitude ? `Lat: ${report.location.latitude.toFixed(4)}, Lng: ${report.location.longitude.toFixed(4)}` : 'Ubicación no disponible')}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Botonera de Acción */}
+                    <div className="mt-5 flex gap-3">
+                      <button 
+                        onClick={() => onDispatch(report.id)}
+                        className="flex-1 bg-[#FF8C00] text-white text-xs font-bold py-3 rounded-xl hover:bg-[#e67e00] transition-colors shadow-sm"
+                      >
+                        Despachar Unidad
+                      </button>
+                      <button 
+                        onClick={() => onFinalize(report.id)}
+                        className="flex-1 bg-slate-100 text-slate-600 text-xs font-bold py-3 rounded-xl hover:bg-slate-200 transition-colors shadow-sm"
+                      >
+                        Finalizar / Eliminar
+                      </button>
+                    </div>
                   </div>
-                  <span className="text-xs text-slate-400">{new Date(report.timestamp).toLocaleString()}</span>
                 </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
 
-                <h3 className="font-bold text-[#003366] text-lg mb-1">{report.description}</h3>
+      {/* USUARIOS Y NOTIFICACIONES */}
+      {activeModule === 'usuarios' && (
+        <div className="animate-in slide-in-from-right-4 duration-300">
+          <AdminUsersView />
+        </div>
+      )}
 
-                <div className="mt-2 p-2 bg-blue-50 rounded-lg border border-blue-100">
-                  <p className="text-[10px] font-black text-blue-800 uppercase">Informante:</p>
-                  <p className="text-sm font-bold text-slate-700">{report.informantName}</p>
-                  <p className="text-xs text-slate-500">📞 {report.informantPhone}</p>
-                </div>
-                <div className="flex items-start gap-2 text-sm text-slate-600 mt-3 bg-slate-50 p-2 rounded">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mt-0.5 text-[#FF8C00]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span>
-                    {report.location.latitude ? `${report.location.latitude}, ${report.location.longitude}` : ''}
-                    {report.location.manualAddress && ` - ${report.location.manualAddress}`}
-                  </span>
-                </div>
-                <div className="mt-4 flex gap-2">
-                  {/* Botón Despachar: Se deshabilita o cambia si ya está en camino */}
-                  <button
-                   onClick={() => onDispatch(report.id)}
-                   disabled={report.estado === 'en_camino'}
-                   className={`flex-1 text-xs font-bold py-2 rounded transition-all ${
-                      report.estado === 'en_camino'
-                      ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
-                      : 'bg-[#FF8C00] text-white hover:bg-[#e67e00]'
-                    }`}
-                   >
-                    {report.estado === 'en_camino' ? 'Unidad Asignada' : 'Despachar Unidad'}
-                  </button>
+      {/* SOPORTE TÉCNICO */}
+      {activeModule === 'soporte' && (
+        <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-slate-200 animate-in slide-in-from-right-4 duration-300">
+          <span className="text-4xl opacity-50 block mb-2">🛠️</span>
+          <p className="text-[#003366] font-bold text-lg">Módulo de Soporte Técnico</p>
+          <p className="text-slate-400 text-sm mt-1">Aquí se gestionarán las solicitudes de recuperación de cuentas ciudadanas.</p>
+        </div>
+      )}
 
-                  <button
-                    onClick={() => onFinalize(report.id)}
-                    className="flex-1 bg-red-50 text-red-600 border border-red-200 text-xs font-bold py-2 rounded hover:bg-red-600 hover:text-white transition-all"
-                    >Finalizar Reporte
-                  </button>
-                </div>
-                <div className="mt-3 w-full h-32 rounded-lg overflow-hidden border border-slate-200">
-                  <p className="text-[10px] font-bold text-slate-500 p-2 bg-slate-50 border-b italic">
-                    📍 UBICACIÓN EN TIEMPO REAL
-                  </p>
-                  <iframe
-                    width="100%"
-                    height="150%"
-                    frameBorder="0"
-                    src={`https://maps.google.com/maps?q=${report.location.latitude},${report.location.longitude}&z=15&output=embed`}
-                    allowFullScreen
-                  >
-                  </iframe>
-                </div>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
     </div>
   );
 };

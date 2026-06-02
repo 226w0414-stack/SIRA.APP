@@ -153,7 +153,7 @@ const LoginView: React.FC<Props> = ({ onLoginSuccess, onGuestAccess, onAdminAcce
               onClick={() => alert("Módulo de soporte técnico en construcción.")}
               className="w-full bg-[#FFC107] text-[#003366] font-bold py-3 rounded-xl hover:bg-[#ffb300] transition-colors text-xs flex items-center justify-center gap-2 shadow-sm"
             >
-              <span className="text-sm">❓</span> ¿PROBLEMAS PARA ACCEDER? SOPORTE TÉC.
+              <span className="text-sm"> ¿PROBLEMAS PARA ACCEDER? SOPORTE TÉCNICO</span>
             </button>
 
             {/* Divisor Visual */}

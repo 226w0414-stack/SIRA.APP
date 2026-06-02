@@ -12,8 +12,7 @@ export interface IncidentReport {
   description: string;
   image: string; // Base64
   location: LocationData;
-  status: 'pending' | 'sent' | 'archived';
-  estado?: 'activo' | 'en_camino' | 'finalizado';
+  status?: 'sent' | 'pending' | 'archived' | 'en_camino' | 'atendiendo' | 'finalizado';  estado?: 'activo' | 'en_camino' | 'finalizado';
   severityAnalysis?: string;
   informantName: string;
   informantPhone: string;
